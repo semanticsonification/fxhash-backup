@@ -1,6 +1,8 @@
 # fxhash backup
 
-Scripts to archive [fxhash](https://www.fxhash.xyz/) generative art collections locally — high-res renders, metadata, and self-contained HTML previews — across all chains (Tezos and Base/Ethereum).
+Scripts to archive [fxhash](https://www.fxhash.xyz/) generative art collections locally — thumbnails, metadata, and self-contained HTML previews — across all chains (Tezos and Base/Ethereum).
+
+100% vibe coded with Claude, use at your own risk.
 
 ## Scripts
 
