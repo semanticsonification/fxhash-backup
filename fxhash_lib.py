@@ -27,6 +27,15 @@ ACCOUNT_FIELDS = """
 """
 
 
+def _safe_name(name: str) -> str:
+    """Convert an arbitrary display name / slug to a filesystem-safe folder name."""
+    name = (name or "unknown").strip().lower()
+    name = re.sub(r"[^\w\s-]", "", name)
+    name = re.sub(r"\s+", "-", name)
+    name = re.sub(r"-{2,}", "-", name)
+    return name or "unknown"
+
+
 # ---------------------------------------------------------------------------
 # GraphQL
 # ---------------------------------------------------------------------------
@@ -367,14 +376,14 @@ def process_images(token: dict, objkts: list[dict], base_dir: Path,
         base_dir/{slug}/metadata/{iteration:04d}.json
         base_dir/{slug}/metadata/_collection.json
     """
-    token_dir  = base_dir / token["slug"]
+    token_dir  = base_dir / _safe_name(token["slug"])
     thumbnails = token_dir / "thumbnails"
     metadata   = token_dir / "metadata"
     thumbnails.mkdir(parents=True, exist_ok=True)
     metadata.mkdir(parents=True, exist_ok=True)
 
     master = build_master_json(token, objkts, extra=master_extra)
-    with open(metadata / "_collection.json", "w") as f:
+    with open(metadata / "_collection.json", "w", encoding="utf-8") as f:
         json.dump(master, f, indent=2, ensure_ascii=False)
     print(f"  Collectors: {master['collectors']['uniqueCount']} unique  "
           f"(holding {len(objkts)} of {master['objktsCount']} total)")
@@ -403,7 +412,7 @@ def process_images(token: dict, objkts: list[dict], base_dir: Path,
             "captureMedia": objkt.get("captureMedia"),
             "displayUri":   objkt.get("displayUri"),
         }
-        with open(meta_path, "w") as f:
+        with open(meta_path, "w", encoding="utf-8") as f:
             json.dump(meta, f, indent=2, ensure_ascii=False)
 
         cid = (objkt.get("captureMedia") or {}).get("cid")
@@ -605,7 +614,7 @@ def process_html(token: dict, objkts: list[dict], base_dir: Path) -> None:
         base_dir/{slug}/html/package/index.html   ← original bundle files
         base_dir/{slug}/html/{iteration:04d}.html  ← per-iteration redirects
     """
-    html_dir    = base_dir / token["slug"] / "html"
+    html_dir    = base_dir / _safe_name(token["slug"]) / "html"
     package_dir = html_dir / "package"
     html_dir.mkdir(parents=True, exist_ok=True)
     if prepare_html_collection(token, package_dir):
